@@ -1,24 +1,20 @@
-import { useLayoutEffect } from 'react';
 import { ButtonAction } from '../ButtonAction/ButtonAction';
 import Card from '../Card/Card';
 import './App.css';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import Popup from '../Popup/Popup';
-
-const newsArray = [
-  { title: "test1", text: "test-text1" },
-  { title: "test2", text: "test-text2" },
-  { title: "test3", text: "test-text3" },
-  { title: "test4", text: "test-text4" },
-  { title: "test5", text: "test-text5" },
-  { title: "test6", text: "test-text6" }
-]
+import { NEWS_ARRAY } from '../../constants/arrayNewsForTest';
+import { useSelector, useDispatch } from 'react-redux';
+import { setStatusActive, setStatusDisabled } from '../App/store/popupStatus';
 
 function App() {
-  const [news, setNews] = useState(JSON.parse(localStorage.getItem('news')) || newsArray.map(item => ({ ...item, id: Math.random() })))
-  const [isOpen, setIsOpen] = useState(false)
+  const [news, setNews] = useState(JSON.parse(localStorage.getItem('news')) || NEWS_ARRAY.map(item => ({ ...item, id: Math.random() })))
+  // const [isOpen, setIsOpen] = useState(false)
   const [editNew, setEditNew] = useState({ title: '', text: '', id: 0 })
+
+  const {isOpenPopup} = useSelector((state) => state.popup)
+  const setIsOpenPopup = useDispatch()
 
   const handleRemoveCard = (id) => {
     setNews(news.filter(i => i.id !== id))
@@ -34,16 +30,16 @@ function App() {
     setNews(news.map(i => i.id === id ? { title, text, id } : i))
     handleClosePopup()
   }
-  const handleOpenPopup = () => {
-    setIsOpen(true)
-  }
+  const handleOpenPopup = () => 
+    setIsOpenPopup(setStatusActive())
+  
   const handleOpenEditPopup = ({ title, text, id }) => {
     setEditNew({ ...editNew, title, text, id })
     handleOpenPopup()
   }
   const handleClosePopup = () => {
     setEditNew({ ...editNew, title: '', text: '', id: 0 })
-    setIsOpen(false)
+    setIsOpenPopup(setStatusDisabled())
   }
 
   const handleCreateCard = ({ title, text }) => {
@@ -62,9 +58,8 @@ function App() {
           <ButtonAction text='Create new' callback={handleOpenPopup} />
           <ul className='news__cards'>
             {news.map((item) =>
-              <li>
+              <li key={item.id}>
                 <Card
-                  key={item.id}
                   data={item}
                   handleRemoveCard={handleRemoveCard}
                   handleOpenEditPopup={handleOpenEditPopup} />
@@ -76,10 +71,9 @@ function App() {
       <footer className="footer">
         <h4>Made by test</h4>
       </footer>
-      {console.log(JSON.stringify(editNew))}
-      {isOpen && <Popup
+      {isOpenPopup && <Popup
         editNew={editNew}
-        isOpen={isOpen}
+        isOpen={isOpenPopup}
         handleClosePopup={handleClosePopup}
         handleEditCard={handleEditCard}
         handleCreateCard={handleCreateCard} />}

@@ -1,5 +1,5 @@
 function Label({ valueData, name, value, error, onChange }) {
-    console.log(name, error)
+    
     return (
         <>
             <label>
