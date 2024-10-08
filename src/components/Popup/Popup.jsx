@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
-import { ButtonAction } from '../ButtonAction/ButtonAction';
 import './Popup.css';
+import { useEffect } from 'react';
 import { useFormAndValidation } from '../../hooks/useFormAndValidation';
+import ButtonAction from '../ButtonAction/ButtonAction';
 import Label from '../Label/Label';
 
-function Popup({ editNew, isOpen, handleClosePopup, handleEditCard, handleCreateCard }) {
-
-    const { title, text, id } = editNew
+function Popup({ data }) {
+    const [newByEdit, isOpen, handleClosePopup, handleEditCard, handleCreateCard] = data
+    const { title, text, _id } = newByEdit
 
     const { values, handleChange, errors, isValid, resetForm, setValues } = useFormAndValidation()
 
@@ -18,7 +18,7 @@ function Popup({ editNew, isOpen, handleClosePopup, handleEditCard, handleCreate
 
     const submitEditNew = (e) => {
         e.preventDefault()
-        handleEditCard({ ...values, id })        
+        handleEditCard({ ...values, _id })
     }
 
     const submitCreateNew = (e) => {
@@ -43,7 +43,7 @@ function Popup({ editNew, isOpen, handleClosePopup, handleEditCard, handleCreate
             return () => {
                 document.removeEventListener("keydown", closePopupByEsc);
                 document.removeEventListener('click', closePopupByClickOverlay);
-                resetForm()
+                resetForm('', '', false)
             }
         }
     }, [isOpen, handleClosePopup])
@@ -56,14 +56,14 @@ function Popup({ editNew, isOpen, handleClosePopup, handleEditCard, handleCreate
                 <form className="popup__form">
                     <Label
                         name='title'
-                        valueData={editNew.title}
+                        valueData={title}
                         value={values?.title}
                         error={errors?.title}
                         onChange={handleChange}
                     />
                     <Label
                         name='text'
-                        valueData={editNew.text}
+                        valueData={text}
                         value={values?.text}
                         error={errors?.text}
                         onChange={handleChange}

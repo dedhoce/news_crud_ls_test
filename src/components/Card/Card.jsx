@@ -1,8 +1,8 @@
 import './Card.css';
-import { ButtonAction } from '../ButtonAction/ButtonAction'
+import ButtonAction from '../ButtonAction/ButtonAction'
 
-function Card({ data, handleRemoveCard, handleOpenEditPopup }) {
-    const { title, text, id } = data
+function Card({ data, handleDeleteCard, handleOpenEditPopup }) {
+    const { title, text, _id } = data
 
     return (
         <article className="card">
@@ -11,7 +11,7 @@ function Card({ data, handleRemoveCard, handleOpenEditPopup }) {
                 <ButtonAction text='Edit' callback={() => handleOpenEditPopup(data)} />
             </div>
             <p className="card__text">{text}</p>
-            <ButtonAction text='Remove new' callback={() => handleRemoveCard(id)} />
+            <ButtonAction text='Remove new' callback={() => handleDeleteCard(_id)} />
         </article>
     );
 }
