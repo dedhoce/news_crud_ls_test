@@ -1,12 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import popupStatus from "./popupStatus";
+import deletedNewsData from "./deletedNewsData";
 import newByEdit from "./newByEdit";
 import newsData from "./newsData";
 import themeDark from "./themeDark";
 
 export const store = configureStore({
     reducer: {
-        popup: popupStatus,
+        deletedNewsData: deletedNewsData,
         newByEdit: newByEdit,
         newsData: newsData,
         themeDark: themeDark

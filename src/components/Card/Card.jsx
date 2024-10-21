@@ -12,7 +12,7 @@ function Card({ data, handleDeleteCard, handleOpenEditPopup }) {
                 <Button variant='outlined' onClick={() => handleOpenEditPopup(data)}>Edit</Button>
             </div>
             <p className="card__text">{text}</p>
-            <IconButton aria-label="delete" onClick={() => handleDeleteCard(_id)} sx={{
+            <IconButton aria-label="delete" onClick={() => handleDeleteCard(data)} sx={{
                 position: 'absolute',
                 top: '-40px',
                 right: '-20px'

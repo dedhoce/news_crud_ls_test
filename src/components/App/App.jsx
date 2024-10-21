@@ -1,17 +1,19 @@
 import './App.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ButtonAction from '../ButtonAction/ButtonAction';
 import Card from '../Card/Card';
 import Popup from '../Popup/Popup';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { setStatusActive, setStatusDisabled } from '../App/store/popupStatus';
 import { setData, setDefault } from './store/newByEdit';
 import { setNewDelete, setNewUpdate, setNewCreate } from './store/newsData';
+import { setDelete, setUpdate, setCreate } from './store/deletedNewsData';
 import { setThemeDark } from './store/themeDark'
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { Button, CssBaseline, Switch } from '@mui/material';
+import { Button, CssBaseline, IconButton, Switch, Badge } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Navigate, Route, Routes, useNavigate } from 'react-router';
 
 const theme = createTheme({
   colorSchemes: {
@@ -20,11 +22,12 @@ const theme = createTheme({
 });
 
 function App() {
+  const navigate = useNavigate()
+
+  const [isOpenPopup, setIsOpenPopup] = useState(false)
+
   const { themeDark } = useSelector((state) => state.themeDark)
   const setIsThemeDark = useDispatch()
-
-  const { isOpenPopup } = useSelector((state) => state.popup)
-  const setIsOpenPopup = useDispatch()
 
   const { newByEdit } = useSelector((state) => state.newByEdit)
   const setNewByEdit = useDispatch()
@@ -32,19 +35,28 @@ function App() {
   const { newsData } = useSelector((state) => state.newsData)
   const setNew = useDispatch()
 
+  const { deletedNewsData } = useSelector((state) => state.deletedNewsData)
+  const setDeletedNewsData = useDispatch()
+
   useEffect(() => {
-    if (newsData.length > 0) {
-      localStorage.setItem('news', JSON.stringify(newsData))
-    }
+    localStorage.setItem('news', JSON.stringify(newsData))
   }, [newsData])
 
+  useEffect(() => {
+    localStorage.setItem('deletedNews', JSON.stringify(deletedNewsData))
+  }, [deletedNewsData])
+
   const handleChangeTheme = (e) => {
-    console.log(1)    
-    setIsThemeDark(setThemeDark(e.target.checked)) 
+    setIsThemeDark(setThemeDark(e.target.checked))
   }
 
-  const handleDeleteCard = (_id) => {
-    setNew(setNewDelete(_id))
+  const handleTransferInBasket = (data) => {
+    setDeletedNewsData(setCreate(data))
+    setNew(setNewDelete(data._id))
+  }
+
+  const handleDeleteCard = (data) => {
+    setDeletedNewsData(setDelete(data._id))
   }
 
   const handleCreateCard = (data) => {
@@ -57,7 +69,7 @@ function App() {
     handleClosePopup()
   }
   const handleOpenPopup = () =>
-    setIsOpenPopup(setStatusActive())
+    setIsOpenPopup(true)
 
   const handleOpenEditPopup = (data) => {
     setNewByEdit(setData(data))
@@ -65,13 +77,23 @@ function App() {
   }
   const handleClosePopup = () => {
     setNewByEdit(setDefault())
-    setIsOpenPopup(setStatusDisabled())
+    setIsOpenPopup(false)
   }
-  console.log(themeDark)
+
   return (
     <ThemeProvider theme={theme}>
       <header className="header">
-        <h3>List news</h3>
+        <a href="/">
+          <h3>List news</h3>
+        </a>
+        <IconButton aria-label="cart" onClick={() => navigate('/basket')}>
+          <Badge badgeContent={deletedNewsData.length} color="secondary" max={99} anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}>
+            <DeleteIcon />
+          </Badge>
+        </IconButton>
         {/* <div className='block-theme'>
           <p>{`Dark theme ${themeDark ? 'ON' : 'OFF'}`}</p>
           <Switch
@@ -84,20 +106,50 @@ function App() {
       </header>
       <main className="main">
         <CssBaseline />
-        <section className="news">
-          <h1 className="news__title">News</h1>
-          <ButtonAction text='Create new' callback={handleOpenPopup} />
-          <ul className='news__cards'>
-            {newsData.map((item) =>
-              <li key={item._id}>
-                <Card
-                  data={item}
-                  handleDeleteCard={handleDeleteCard}
-                  handleOpenEditPopup={handleOpenEditPopup} />
-              </li>
-            )}
-          </ul>
-        </section>
+        <Routes>
+          <Route path="/" element={
+            <section className="news">
+              <h1 className="news__title">News</h1>
+              <ButtonAction text='Create new' callback={handleOpenPopup} />
+              <ul className='news__cards'>
+                {newsData.map((item) =>
+                  <li key={item._id}>
+                    <Card
+                      data={item}
+                      handleDeleteCard={handleTransferInBasket}
+                      handleOpenEditPopup={handleOpenEditPopup} />
+                  </li>
+                )}
+              </ul>
+            </section>
+          }>
+          </Route>
+          <Route path="/basket" element={
+            <section className="news basket-news">
+              <h1 className="news__title">Deleted News</h1>
+              <p className="news__title">You can change and restore or delete permanently</p>
+              {deletedNewsData.length > 0
+                ?
+                <>
+                  <ButtonAction text='Clear basket' callback={handleOpenPopup} />
+                  <ul className='news__cards'>
+                    {deletedNewsData.map((item) =>
+                      <li key={item._id}>
+                        <Card
+                          data={item}
+                          handleDeleteCard={handleDeleteCard}
+                          handleOpenEditPopup={handleOpenEditPopup} />
+                      </li>
+                    )}
+                  </ul>
+                </>
+                :
+                <h2 className="basket-news">No deleted news found</h2>
+              }
+            </section>
+          }>
+          </Route>
+        </Routes>
       </main>
       <footer className="footer">
         <h4>Made by test</h4>
